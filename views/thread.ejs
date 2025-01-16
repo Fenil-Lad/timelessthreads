@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap"
+        rel="stylesheet">
+    <title>Timeless Threads</title>
+    <style>
+        /* Global Styles */
+        body {
+            background: linear-gradient(to right, #007aff, #5ac8fa);
+            font-family: poppins;
+            color: #f3f3f3;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Chat container styling */
+        .chat-container {
+            width: 100%;
+            max-width: 500px;
+            background: #212121;
+            border-radius: 35px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 20px rgba(20, 20, 20, 0.508);
+            backdrop-filter: blur(20px);
+        }
+
+        /* User info styling */
+        .user-info {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding-bottom: 20px;
+        }
+
+        .user-info .name {
+            font-size: 20px;
+            color: #f3f3f3;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .user-info .status {
+            font-size: 15px;
+            color: #66ff66;
+            display: flex;
+            align-items: center;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #66ff66;
+            /* Green indicator */
+            margin-right: 5px;
+        }
+
+        .profile_div {
+            margin-left: 220px;
+        }
+
+        .exit_btn {
+            filter: invert();
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50px;
+            margin-left: 170px;
+            margin-top: 10px;
+        }
+
+        h2 {
+            font-size: 28px;
+            text-align: center;
+            color: #f3f3f3;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            scrollbar-width: thin;
+            scrollbar-color: #5c6bc0 #121212;
+            height: 400px;
+        }
+
+        .messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: #5c6bc0;
+            border-radius: 4px;
+        }
+
+        .messages::-webkit-scrollbar-track {
+            background: #121212;
+        }
+
+        .message {
+            padding: 16px 20px;
+            border-radius: 25px;
+            max-width: 75%;
+            font-size: 15px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            box-shadow: 0 8px 10px rgba(0, 0, 0, 0.071);
+            transition: transform 0.3s ease, box-shadow 0.2s ease;
+        }
+
+        .message.my-message {
+            background: linear-gradient(to right, #007aff, #5ac8fa);
+            color: white;
+            margin-left: auto;
+            border-top-left-radius: 0;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+        }
+
+        .message.other-message {
+            background: #1c1c1e;
+            color: #f3f3f3;
+            border-top-right-radius: 0;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+        }
+
+        .message:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+        }
+
+        input {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 30px;
+            background: #2F2F2F;
+            color: #f3f3f3;
+            font-size: 17px;
+            border: 1px solid #333;
+            outline: none;
+            transition: background 0.3s ease, border 0.3s ease;
+        }
+
+        img#sendBtn_img {
+            width: 50px;
+            height: 50px;
+            filter: saturate(0);
+        }
+
+        button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50px;
+            border: 1px solid white;
+            margin-left: 14px;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #2F2F2F;
+            color: white;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            background: #0051a2;
+        }
+
+        /* Animation for message entry */
+        .message-enter {
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Default message styling */
+        .default-message {
+            font-size: 16px;
+            color: #888;
+            text-align: center;
+            font-style: italic;
+            margin-top: 150px;
+            padding: 20px;
+            user-select: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="chat-container">
+        <div class="user-info">
+            <div class="profile_div">
+                <div class="name" id="profileName"></div>
+                <div class="status">
+                    <div class="status-indicator"></div>
+                    Online
+                </div>
+            </div>
+            <a href="/" class="exit_btn"><img width="25" height="25"
+                    src="https://img.icons8.com/ios-filled/50/logout-rounded.png" alt="logout-rounded" /></a>
+        </div>
+
+        <div class="messages" id="messages">
+            <div class="default-message" id="defaultMessage">Start a conversation...</div>
+        </div>
+
+        <div class="input-container">
+            <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off" />
+            <button id="sendBtn">
+                ➤
+            </button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const sendBtn = document.getElementById('sendBtn');
+        const messageInput = document.getElementById('messageInput');
+        const messagesContainer = document.getElementById('messages');
+        const defaultMessage = document.getElementById('defaultMessage');
+
+        const socket = io();
+
+        // Retrieve the session key
+        const sessionId = sessionStorage.getItem('sessionKey');
+
+        // Join the session when the user connects
+        socket.emit('joinSession', sessionId);
+
+        // Handle incoming messages
+        socket.on('chatMessage', (message) => {
+            if (message.type === 'profile-update') {
+                document.getElementById('profileName').innerText = message.message;
+            }
+
+            else {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', 'other-message', 'message-enter');
+                messageElement.textContent = message;
+                messagesContainer.appendChild(messageElement);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            // Remove default message if any
+            if (defaultMessage) {
+                defaultMessage.style.display = 'none';
+            }
+        });
+
+        // Handle message send event
+        sendBtn.addEventListener('click', () => {
+            const messageText = messageInput.value.trim();
+            if (messageText) {
+                // Send message to the server with session ID
+                socket.emit('chatMessage', sessionId, messageText);
+
+                // Display the message in the UI
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', 'my-message', 'message-enter');
+                messageElement.textContent = messageText;
+                messagesContainer.appendChild(messageElement);
+
+                // Clear the input field and scroll to the bottom
+                messageInput.value = '';
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+                // Remove default message if any
+                if (defaultMessage) {
+                    defaultMessage.style.display = 'none';
+                }
+                messageInput.focus();
+            }
+        });
+
+        // You can also handle pressing "Enter" to send the message
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendBtn.click();
+                messageInput.focus();
+            }
+        });
+
+        function fetchProfileByThreadId(threadId, status) {
+            fetch('/getProfileByThreadId', {
+                method: 'POST', // Change the HTTP method to POST
+                headers: {
+                    'Content-Type': 'application/json', // Specify JSON content
+                },
+                body: JSON.stringify({ threadId, status }), // Send threadId and status in the body
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (status === "host") {
+                        document.getElementById('profileName').innerText = data.partner;
+                    }
+                    else if (status === "partner") {
+                        document.getElementById('profileName').innerText = data.hostname;
+                    } else {
+                        console.error('Data not found.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching profile:', error);
+                });
+        }
+
+
+        window.onload = function () {
+            const status = sessionStorage.getItem('status');
+            fetchProfileByThreadId(sessionId, status);
+        };
+    </script>
+</body>
+
+</html>

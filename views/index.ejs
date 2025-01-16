@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap"
+        rel="stylesheet">
+    <title>Timeless Threads</title>
+    <style>
+        body {
+            background: linear-gradient(to right, #007aff, #5ac8fa);
+            font-family: poppins;
+            color: #f3f3f3;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: #212121;
+            border-radius: 35px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+        }
+
+        h1 {
+            font-size: 28px;
+            text-align: center;
+            color: #f3f3f3;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .description {
+            text-align: center;
+            font-size: 16px;
+            color: #bbb;
+            margin-bottom: 30px;
+        }
+
+        .button {
+            display: block;
+            margin: 10px auto;
+            padding: 14px 20px;
+            font-size: 18px;
+            background: linear-gradient(to right, #007aff, #5ac8fa);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            text-align: center;
+            width: 200px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+        }
+
+        .input-container {
+            margin: auto;
+            margin-top: 20px;
+        }
+
+        .input-field-container {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        input {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 30px;
+            background: #2F2F2F;
+            color: #f3f3f3;
+            font-size: 17px;
+            border: 1px solid #333;
+            outline: none;
+            transition: background 0.3s ease, border 0.3s ease;
+            margin-top: 20px;
+        }
+
+        button.button_two {
+            width: 50px;
+            height: 50px;
+            border-radius: 50px;
+            border: 1px solid white;
+            margin-left: 14px;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            background-color: #2F2F2F;
+            color: white;
+        }
+
+        button.button_two:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+        }
+
+        button.button_two:active {
+            background: #0051a2;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container">
+        <h1>Timeless Threads</h1>
+        <p class="description">Welcome to your own little corner of the world, where you and someone special can
+            connect, chat, and share memories like old friends. Pick an option below and start creating moments that’ll
+            last a lifetime.</p>
+
+        <!-- Buttons to create or join a thread -->
+        <button class="button" id="createBtn">Create a Thread</button>
+        <button class="button" id="joinBtn">Join a Thread</button>
+
+        <!-- Input field for creating a thread -->
+        <div class="input-container" style="display: none;" id="createInputContainer">
+            <input type="text" id="nameInput-create" placeholder="Enter Your Name" autocomplete="off" />
+            <button class="button_two" id="createSessionBtn">
+                ➤
+            </button>
+            <button class="button_two" id="cancelCreatingThreadBtn">×</button>
+        </div>
+
+        <!-- Input fields for joining a thread -->
+        <div class="input-container" style="display: none;" id="joinInputContainer">
+            <div class="input-field-container">
+                <input type="text" name="threadIdInput" id="threadIdInput" placeholder="Enter Thread ID"
+                    autocomplete="off" />
+                <input type="text" name="nameInput" id="nameInput" placeholder="Enter Your Name" autocomplete="off" />
+            </div>
+            <div class="button-container">
+                <button class="button_two" id="joinSessionBtn">
+                    ➤
+                </button>
+                <button class="button_two" id="cancelJoiningThreadBtn">×</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Elements
+        const createBtn = document.getElementById('createBtn');
+        const joinBtn = document.getElementById('joinBtn');
+
+        const createInputContainer = document.getElementById('createInputContainer');
+        const joinInputContainer = document.getElementById('joinInputContainer');
+
+        const nameInputCreate = document.getElementById('nameInput-create');
+        const nameInput = document.getElementById('nameInput');
+        const threadIdInput = document.getElementById('threadIdInput');
+
+        const cancelCreatingThreadBtn = document.getElementById('cancelCreatingThreadBtn');
+        const cancelJoiningThreadBtn = document.getElementById('cancelJoiningThreadBtn');
+
+        const createSessionBtn = document.getElementById('createSessionBtn');
+        const joinSessionBtn = document.getElementById('joinSessionBtn');
+
+        // Handle "Create a Thread"
+        createBtn.addEventListener('click', async () => {
+            joinInputContainer.style.display = 'none';
+            createInputContainer.style.display = 'block';
+            nameInputCreate.focus();
+        });
+
+        // Handle "Cancel Creating Thread"
+        cancelCreatingThreadBtn.addEventListener('click', () => {
+            createInputContainer.style.display = 'none';
+            nameInputCreate.value = '';
+        });
+
+        // Handle Thread Creating
+        createSessionBtn.addEventListener('click', async () => {
+            const userName = nameInputCreate.value.trim(); // Trim to avoid spaces-only input
+
+            if (!userName) { // Check for empty or whitespace input
+                alert('Please fill the user name.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/generate-session-key', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userName: userName
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) { // Check if response status is OK and data indicates success
+                    alert('Session created successfully! Session Key: ' + data.sessionKey);
+                    sessionStorage.setItem('sessionKey', data.sessionKey);
+                    sessionStorage.setItem('status', "host");
+                    window.location.href = '/thread';
+                    // Continue with session flow (e.g., redirect to chat or thread)
+                } else {
+                    // Handle server-side error message
+                    alert(data.message || 'Failed to create session.');
+                }
+            } catch (error) {
+                console.error('Error creating session:', error);
+                alert('An error occurred while creating the session.');
+            }
+        });
+
+
+        // Handle "Join a Thread"
+        joinBtn.addEventListener('click', () => {
+            createInputContainer.style.display = 'none';
+            joinInputContainer.style.display = 'block';
+            threadIdInput.focus();
+        });
+
+        // Handle "Cancel Joining Thread"
+        cancelJoiningThreadBtn.addEventListener('click', () => {
+            joinInputContainer.style.display = 'none';
+            nameInput.value = '';
+            threadIdInput.value = '';
+        });
+
+        // Handle Thread Joining
+        joinSessionBtn.addEventListener('click', async () => {
+            if (threadIdInput.value.trim() == "") {
+                alert('Please fill the thread ID.')
+            }
+
+            else if (nameInput.value.trim() == "") {
+                alert('Please fill the user name.')
+            }
+
+            else {
+                try {
+                    const userName = nameInput.value.trim();
+                    const threadID = threadIdInput.value.trim();
+                    // Send POST request to the server
+                    const response = await fetch('/join-thread', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ threadID: threadID, userName: userName })
+                    });
+
+                    // // Parse and handle the response
+                    const result = await response.json();
+
+                    if (response.ok && result.success) { // Check if response status is OK and data indicates success
+                        alert(result.message);
+                        // localStorage.setItem('sessionKey', threadID);
+                        sessionStorage.setItem('sessionKey', threadID);
+                        sessionStorage.setItem('status', "partner");
+                        window.location.href = '/thread';
+                        // Continue with session flow (e.g., redirect to chat or thread)
+                    } else {
+                        // Handle server-side error message
+                        alert(result.message || 'Failed to create a thread');
+                    }
+                } catch (error) {
+                    // Handle errors
+                    console.error('Error:', error);
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
