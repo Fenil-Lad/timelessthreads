@@ -26,11 +26,12 @@
 
         /* Chat container styling */
         .chat-container {
-            width: 100%;
-            max-width: 500px;
+            width: 500px;
+            min-width: 250px;
             background: #212121;
             border-radius: 35px;
             padding: 20px;
+            margin: 10px;
             display: flex;
             flex-direction: column;
             box-shadow: 0 10px 20px rgba(20, 20, 20, 0.508);
@@ -41,16 +42,22 @@
         .user-info {
             display: flex;
             flex-direction: row;
+            justify-content: space-around;
             align-items: center;
             padding-bottom: 20px;
+            border-bottom: 1px solid #333;
         }
 
         .user-info .name {
             font-size: 20px;
             color: #f3f3f3;
             font-weight: 500;
-            margin-bottom: 5px;
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
+
 
         .user-info .status {
             font-size: 15px;
@@ -69,8 +76,25 @@
         }
 
         .profile_div {
-            margin-left: 220px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
+
+        /* .inviteDiv {
+            margin-top: 10px;
+        }
+
+        .inviteBtn
+        {
+            font-size: 17px;
+            background: transparent;
+            color: white;
+            border: none;
+            cursor: pointer;
+        } */
+
 
         .exit_btn {
             filter: invert();
@@ -171,7 +195,7 @@
             filter: saturate(0);
         }
 
-        button {
+        .circleBtn {
             width: 50px;
             height: 50px;
             border-radius: 50px;
@@ -189,12 +213,12 @@
             color: white;
         }
 
-        button:hover {
+        .circleBtn:hover {
             transform: scale(1.1);
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
         }
 
-        button:active {
+        .circleBtn:active {
             background: #0051a2;
         }
 
@@ -217,13 +241,53 @@
 
         /* Default message styling */
         .default-message {
-            font-size: 16px;
+            font-size: 14px;
             color: #888;
             text-align: center;
             font-style: italic;
-            margin-top: 150px;
+            margin-top: 100px;
             padding: 20px;
             user-select: none;
+        }
+
+        .copyBtn {
+            background: none;
+            border: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .copyBtnImg {
+            filter: invert(35%);
+            cursor: pointer;
+        }
+
+        .copyBtnImg:hover {
+            filter: invert(70%);
+            transition: .5s;
+        }
+
+        .thread-id-div {
+            width: 190px;
+            margin: auto;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        @media(max-width: 600px) {
+            body {
+                justify-content: flex-start;
+                align-items: flex-start;
+                height: 100vh;
+            }
+
+            .chat-container {
+                width: 100%;
+                margin: 0;
+                height: 100vh;
+                border-radius: 0%;
+            }
         }
     </style>
 </head>
@@ -234,22 +298,43 @@
         <div class="user-info">
             <div class="profile_div">
                 <div class="name" id="profileName"></div>
-                <div class="status">
+                <!-- <div class="status">
                     <div class="status-indicator"></div>
                     Online
-                </div>
+                </div> -->
+                <!-- <div class="inviteDiv">
+                    <button class="inviteBtn" onclick="yourFunction()">Invite</button>
+                </div> -->
             </div>
             <a href="/" class="exit_btn"><img width="25" height="25"
                     src="https://img.icons8.com/ios-filled/50/logout-rounded.png" alt="logout-rounded" /></a>
         </div>
 
-        <div class="messages" id="messages">
+        <!-- <div class="messages" id="messages">
             <div class="default-message" id="defaultMessage">Start a conversation...</div>
+        </div> -->
+
+        <div class="messages" id="messages">
+            <div class="default-message" id="defaultMessage">
+                <p class="instruction-text">Ready to chat? Simply share the Thread ID below with your friend to get the
+                    conversation going!</p>
+                <div class="thread-info">
+                    <p class="thread-id-label">Thread ID:</p>
+                    <div class="thread-id-div">
+                        <span id="threadId" class="thread-id">-</span>
+                        <button class="copyBtn" id="copyBtn">
+                            <img class="copyBtnImg" width="18" height="18"
+                                src="https://img.icons8.com/material-rounded/24/copy.png" alt="copy" />
+                        </button>
+                    </div>
+                    <p class="instruction-text">Once they enter this Thread ID, the chat will begin!</p>
+                </div>
+            </div>
         </div>
 
         <div class="input-container">
             <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off" />
-            <button id="sendBtn">
+            <button class="circleBtn" id="sendBtn">
                 ➤
             </button>
         </div>
@@ -261,6 +346,7 @@
         const messageInput = document.getElementById('messageInput');
         const messagesContainer = document.getElementById('messages');
         const defaultMessage = document.getElementById('defaultMessage');
+        const copyBtn = document.getElementById("copyBtn");
 
         const socket = io();
 
@@ -282,11 +368,11 @@
                 messageElement.textContent = message;
                 messagesContainer.appendChild(messageElement);
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }
 
-            // Remove default message if any
-            if (defaultMessage) {
-                defaultMessage.style.display = 'none';
+                // Remove default message if any
+                if (defaultMessage) {
+                    defaultMessage.style.display = 'none';
+                }
             }
         });
 
@@ -339,6 +425,11 @@
                 })
                 .then(data => {
                     if (status === "host") {
+                        if (data.partner === null) {
+                            document.getElementById('profileName').innerText = "-";
+                            // document.getElementById('profileName').style.display = "none";
+                            return;
+                        }
                         document.getElementById('profileName').innerText = data.partner;
                     }
                     else if (status === "partner") {
@@ -352,11 +443,40 @@
                 });
         }
 
-
         window.onload = function () {
             const status = sessionStorage.getItem('status');
             fetchProfileByThreadId(sessionId, status);
+            const threadID = sessionStorage.getItem('sessionKey');
+            document.getElementById("threadId").innerText = threadID;
         };
+
+        // Function to copy the string to clipboard
+        function copyThreadIDToClipboard() {
+
+            // Use the Clipboard API to write text
+            navigator.clipboard.writeText(sessionId).then(function () {
+                // Alert the user that the text was copied
+                alert("Copied the thread ID: " + sessionId);
+            }).catch(function (error) {
+                // Handle errors
+                console.error("Error copying text: ", error);
+            });
+        }
+
+        // Add event listener for the button click
+        copyBtn.addEventListener("click", copyThreadIDToClipboard);
+
+        window.addEventListener("beforeunload", (event) => {
+            // Custom message (some browsers ignore this)
+            const message = "Are you sure you want to reload? All your chats will be lost.";
+
+            // Set the return value on the event
+            event.preventDefault(); // Some browsers require this for custom messages.
+            event.returnValue = message; // Standard way to set a message.
+
+            return message; // For legacy browsers.
+        });
+
     </script>
 </body>
 

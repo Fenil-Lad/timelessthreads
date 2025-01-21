@@ -2,8 +2,7 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
-const { stat } = require('fs');
-const { hostname } = require('os');
+const { green, red, yellow, cyan, magenta } = require('colorette');
 
 // Initialize express app and server
 const app = express();
@@ -14,29 +13,24 @@ const io = socketIo(server);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-
-const group = {
-  // Formate 
-  // "SESSION-KEY1": {
-  //   "hostname": "Fenil",
-  //   "partner": "Krishna"
-  // },
-};
-
+// Group object to store sessions
+const group = {};
 
 // Middleware to parse JSON body
-app.use(express.json()); // Add this line
+app.use(express.json());
 
 // Serve static files (like CSS, JS)
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Home route
 app.get('/', (req, res) => {
+  console.info(green(`[INFO] Serving Home page.`));
   res.render('index');
 });
 
-// Home route
+// Thread route
 app.get('/thread', (req, res) => {
+  console.info(green(`[INFO] Serving Thread page.`));
   res.render('thread');
 });
 
@@ -45,122 +39,102 @@ app.post('/generate-session-key', (req, res) => {
   const { userName } = req.body;
 
   if (!userName) {
+    console.error(red(`[ERROR] User Name not provided.`));
     return res.status(400).json({ success: false, message: 'User Name is required.' });
   }
 
-  // Generate a unique session key
   const sessionKey_value = `SESSION-${Math.random().toString(36).substr(2, 9)}`;
-
-  // Add the new session to the group
   group[sessionKey_value] = {
     hostname: userName,
-    partner: null
+    partner: null,
   };
 
-  console.log(`THREADS UPDATED:`, group);
+  console.info(cyan(`[INFO] Session key generated: ${sessionKey_value}`));
+  console.info(magenta(`[INFO] Updated Threads:`), group);
 
   return res.json({ success: true, sessionKey: sessionKey_value, group });
 });
 
+// Join thread route
 app.post('/join-thread', (req, res) => {
   const { threadID, userName } = req.body;
 
-  // Validate input
   if (!threadID || !userName) {
-    return res.status(400).json({ success: false, message: "threadID and userName are required." });
+    console.error(red(`[ERROR] threadID or userName not provided.`));
+    return res.status(400).json({ success: false, message: 'threadID and userName are required.' });
   }
 
-  // Check if the thread exists in the group object
   if (group[threadID]) {
     if (group[threadID].partner == null) {
       group[threadID].partner = userName;
-      console.log(`THREAD UPDATED:`, group);
+      console.info(cyan(`[INFO] User ${userName} joined thread: ${threadID}`));
+      console.info(magenta(`[INFO] Updated Threads:`), group);
       sendProfileUpdate(threadID, userName);
       return res.json({ success: true, message: threadID, group });
+    } else {
+      console.warn(yellow(`[WARN] Thread ${threadID} already has a partner.`));
+      return res.status(400).json({ success: false, message: 'Only room for one plus one. No more.' });
     }
-    else {
-      console.log("Only room for one plus one. No more.");
-      return res.status(400).json({ success: false, message: "Only room for one plus one. No more." });
-    }
-
   } else {
-    console.log({ success: false, message: "Thread not found." });
-    return res.status(404).json({ success: false, message: "Thread not found." });
+    console.error(red(`[ERROR] Thread ${threadID} not found.`));
+    return res.status(404).json({ success: false, message: 'Thread not found.' });
   }
 });
 
+// Get profile by thread ID
 app.post('/getProfileByThreadId', (req, res) => {
-  const { threadId, status } = req.body;
+  const { threadId } = req.body;
 
-  console.log('Thread ID:', threadId); // Log threadId
-  console.log('Status:', status); // Log status
+  console.info(cyan(`[INFO] Fetching profile for Thread ID: ${threadId}`));
 
-  // Check if the threadId exists in the group and retrieve the data
   const session = group[threadId];
 
   if (session) {
-    if (status === "host") {
-      res.json({
-        partner: session.partner,
-      });
-    }
-
-    else if (status === "partner") {
-      res.json({
-        hostname: session.hostname
-      });
-    }
+    console.info(cyan(`[INFO] Returning session hostname and partner names for Thread ID: ${threadId}`));
+    res.json({ hostname: session.hostname, partner: session.partner });
   } else {
-    console.error(`Thread ID ${threadId} not found`);
+    console.error(red(`[ERROR] Thread ID ${threadId} not found.`));
     res.status(404).json({ error: 'ThreadId not found.' });
   }
 });
 
-// Socket.io connection
+// Socket connection
 io.on('connection', (socket) => {
-  console.log('A user connected');
+  console.info(green(`[INFO] New connection established: Socket ID ${socket.id}`));
 
-  // When a user joins a session
   socket.on('joinSession', (sessionId) => {
     socket.join(sessionId);
-    console.log(`User joined session: ${sessionId}`);
+    console.info(cyan(`[INFO] Socket ID ${socket.id} joined session: ${sessionId}`));
   });
 
-  // Broadcast message to the other person in the same session
   socket.on('chatMessage', (sessionId, msg) => {
-    // Emit the message to all other clients in the session except the sender
     socket.to(sessionId).emit('chatMessage', msg);
-    console.log(`Message sent in session ${sessionId}: ${msg}`);
+    console.info(cyan(`[MESSAGE] Session ${sessionId} | Sender: ${socket.id} | Message: "${msg}"`));
   });
 
-  // Disconnect event
   socket.on('disconnect', () => {
-    console.log('User disconnected');
+    console.warn(yellow(`[WARN] Socket ID ${socket.id} disconnected.`));
   });
 });
 
-
-// Function to send a message to a hostname from the server
+// Send profile update message to session
 function sendProfileUpdate(sessionId, message) {
   const session = group[sessionId];
 
   if (session && session.hostname) {
-    // Send a special flag with the message to indicate a profile update
     const profileUpdateMessage = {
-      type: 'profile-update', // Special type identifier
+      type: 'profile-update',
       message: message,
     };
 
-    io.to(sessionId).emit('chatMessage', profileUpdateMessage); // Emit with type info
-    console.log(`Message sent to ${session.hostname} in session ${sessionId}: ${message}`);
+    io.to(sessionId).emit('chatMessage', profileUpdateMessage);
+    console.info(cyan(`[INFO] Profile update sent to ${session.hostname} in session ${sessionId}: ${message}`));
   } else {
-    console.log(`Hostname ${session.hostname} not found.`);
+    console.warn(yellow(`[WARN] Hostname not found for session ${sessionId}.`));
   }
 }
 
-
-
 // Start the server
 server.listen(3000, () => {
-  console.log('Server is running on http://localhost:3000');
+  console.info(green(`[INFO] Server is running on http://localhost:3000`));
 });

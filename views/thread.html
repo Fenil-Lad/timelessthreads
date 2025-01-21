@@ -26,11 +26,12 @@
 
         /* Chat container styling */
         .chat-container {
-            width: 100%;
-            max-width: 500px;
+            width: 500px;
+            min-width: 250px;
             background: #212121;
             border-radius: 35px;
             padding: 20px;
+            margin: 10px;
             display: flex;
             flex-direction: column;
             box-shadow: 0 10px 20px rgba(20, 20, 20, 0.508);
@@ -225,6 +226,22 @@
             padding: 20px;
             user-select: none;
         }
+
+        @media(max-width: 600px) {
+            body
+            {
+                justify-content: flex-start;
+                align-items: flex-start;
+                height: 100vh;
+            }
+            .chat-container {
+                width: 100%;
+                margin: 0;
+                height: 100vh;
+                border-radius: 0%;
+                
+            }
+        }
     </style>
 </head>
 
@@ -233,14 +250,14 @@
     <div class="chat-container">
         <div class="user-info">
             <div class="profile_div">
-                <div class="name">Krishna</div>
+                <div class="name" id="profileName"></div>
                 <div class="status">
                     <div class="status-indicator"></div>
                     Online
                 </div>
             </div>
-            <a href="/" class="exit_btn"><img width="25" height="25"
-                    src="https://img.icons8.com/ios-filled/50/logout-rounded.png" alt="logout-rounded" /></a>
+            <!-- <a href="/" class="exit_btn"><img width="25" height="25"
+                    src="https://img.icons8.com/ios-filled/50/logout-rounded.png" alt="logout-rounded" /></a> -->
         </div>
 
         <div class="messages" id="messages">
@@ -257,7 +274,6 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-
         const sendBtn = document.getElementById('sendBtn');
         const messageInput = document.getElementById('messageInput');
         const messagesContainer = document.getElementById('messages');
@@ -267,16 +283,23 @@
 
         // Retrieve the session key
         const sessionId = sessionStorage.getItem('sessionKey');
+
         // Join the session when the user connects
         socket.emit('joinSession', sessionId);
 
         // Handle incoming messages
         socket.on('chatMessage', (message) => {
-            const messageElement = document.createElement('div');
-            messageElement.classList.add('message', 'other-message', 'message-enter');
-            messageElement.textContent = message;
-            messagesContainer.appendChild(messageElement);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            if (message.type === 'profile-update') {
+                document.getElementById('profileName').innerText = message.message;
+            }
+
+            else {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', 'other-message', 'message-enter');
+                messageElement.textContent = message;
+                messagesContainer.appendChild(messageElement);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
 
             // Remove default message if any
             if (defaultMessage) {
@@ -316,6 +339,41 @@
                 messageInput.focus();
             }
         });
+
+        function fetchProfileByThreadId(threadId, status) {
+            fetch('/getProfileByThreadId', {
+                method: 'POST', // Change the HTTP method to POST
+                headers: {
+                    'Content-Type': 'application/json', // Specify JSON content
+                },
+                body: JSON.stringify({ threadId, status }), // Send threadId and status in the body
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (status === "host") {
+                        document.getElementById('profileName').innerText = data.partner;
+                    }
+                    else if (status === "partner") {
+                        document.getElementById('profileName').innerText = data.hostname;
+                    } else {
+                        console.error('Data not found.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching profile:', error);
+                });
+        }
+
+
+        window.onload = function () {
+            const status = sessionStorage.getItem('status');
+            fetchProfileByThreadId(sessionId, status);
+        };
     </script>
 </body>
 

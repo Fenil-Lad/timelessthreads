@@ -21,6 +21,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            overflow: hidden;
         }
 
         .container {
@@ -29,10 +30,12 @@
             background: #212121;
             border-radius: 35px;
             padding: 30px;
+            margin: 10px;
             display: flex;
             flex-direction: column;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(20px);
+            overflow: hidden;
         }
 
         h1 {
@@ -122,8 +125,72 @@
             align-items: center;
             margin-top: 20px;
         }
-    </style>
 
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                max-width: 90%;
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .button {
+                width: 100%;
+                font-size: 16px;
+            }
+
+            .description {
+                font-size: 14px;
+                margin-bottom: 20px;
+            }
+
+            input {
+                font-size: 15px;
+                padding: 12px 18px;
+            }
+
+            button.button_two {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                max-width: 90%;
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .button {
+                width: 100%;
+                font-size: 14px;
+            }
+
+            .description {
+                font-size: 12px;
+                margin-bottom: 15px;
+            }
+
+            input {
+                font-size: 14px;
+                padding: 10px 15px;
+            }
+
+            button.button_two {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+        }
+    </style>
 </head>
 
 <body>
