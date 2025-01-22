@@ -134,7 +134,14 @@ function sendProfileUpdate(sessionId, message) {
   }
 }
 
+// // Start the server
+// server.listen(3000, () => {
+//   console.info(green(`[INFO] Server is running on http://localhost:3000`));
+// });
+
+
 // Start the server
-server.listen(3000, () => {
-  console.info(green(`[INFO] Server is running on http://localhost:3000`));
+const port = process.env.PORT || 3000;  // Use Heroku's port, or 3000 for local development
+server.listen(port, () => {
+  console.info(green(`[INFO] Server is running on http://localhost:${port}`));
 });
